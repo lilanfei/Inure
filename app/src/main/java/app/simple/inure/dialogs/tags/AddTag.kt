@@ -14,7 +14,7 @@ import app.simple.inure.adapters.viewers.AdapterTags
 import app.simple.inure.decorations.corners.DynamicCornerEditText
 import app.simple.inure.decorations.ripple.DynamicRippleTextView
 import app.simple.inure.decorations.typeface.TypeFaceTextView
-import app.simple.inure.decorations.views.TagsRecyclerView
+import app.simple.inure.decorations.views.EditTagRecyclerView
 import app.simple.inure.extensions.fragments.ScopedDialogFragment
 import app.simple.inure.themes.manager.ThemeManager
 import app.simple.inure.util.TextViewUtils.doOnTextChanged
@@ -26,7 +26,7 @@ class AddTag : ScopedDialogFragment() {
 
     private lateinit var count: TypeFaceTextView
     private lateinit var editText: DynamicCornerEditText
-    private lateinit var existingTags: TagsRecyclerView
+    private lateinit var existingTags: EditTagRecyclerView
     private lateinit var close: DynamicRippleTextView
     private lateinit var add: DynamicRippleTextView
 
@@ -81,6 +81,14 @@ class AddTag : ScopedDialogFragment() {
 
         tagsViewModel!!.getTagNames().observe(viewLifecycleOwner) {
             existingTags.visible(animate = false)
+
+            if (it.size > 10) {
+                existingTags.maxHeight = resources.getDimensionPixelSize(R.dimen.tags_recycler_view_max_height)
+            } else {
+                // Passing -1 disables the max height and defaults back to standard wrap_content
+                existingTags.maxHeight = -1
+            }
+
             adapterTags = AdapterTags(it, false).apply {
                 setOnTagCallbackListener(object : AdapterTags.Companion.TagsCallback {
                     override fun onTagClicked(tag: String) {

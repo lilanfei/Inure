@@ -1,6 +1,7 @@
 package app.simple.inure.ui.panels
 
 import android.app.SearchManager
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageInfo
@@ -27,6 +28,7 @@ import app.simple.inure.apk.utils.PackageUtils.isSplitApk
 import app.simple.inure.apk.utils.PackageUtils.launchThisPackage
 import app.simple.inure.apk.utils.PackageUtils.safeApplicationInfo
 import app.simple.inure.constants.BundleConstants
+import app.simple.inure.constants.Warnings
 import app.simple.inure.decorations.ripple.DynamicRippleConstraintLayout
 import app.simple.inure.decorations.ripple.DynamicRippleImageButton
 import app.simple.inure.decorations.ripple.DynamicRippleTextView
@@ -83,6 +85,7 @@ import app.simple.inure.ui.viewers.Operations
 import app.simple.inure.ui.viewers.Permissions
 import app.simple.inure.ui.viewers.Providers
 import app.simple.inure.ui.viewers.Receivers
+import app.simple.inure.ui.viewers.RecentExits
 import app.simple.inure.ui.viewers.Resources
 import app.simple.inure.ui.viewers.Services
 import app.simple.inure.ui.viewers.SharedLibs
@@ -97,6 +100,7 @@ import app.simple.inure.util.ConditionUtils.invert
 import app.simple.inure.util.FileUtils.toFile
 import app.simple.inure.util.InfoStripUtils.getAppInfo
 import app.simple.inure.util.MarketUtils
+import app.simple.inure.util.PermissionUtils.checkDumpPermission
 import app.simple.inure.util.PermissionUtils.checkStoragePermission
 import app.simple.inure.util.ViewUtils.gone
 import app.simple.inure.util.ViewUtils.visible
@@ -367,6 +371,14 @@ class AppInfo : ScopedFragment() {
                                 })
                             }
                         }
+
+                        R.string.recent_exits -> {
+                            if (requireContext().checkDumpPermission()) {
+                                openFragmentArc(RecentExits.newInstance(packageInfo), icon, RecentExits.TAG)
+                            } else {
+                                showWarning(Warnings.DUMP_PERMISSION_NOT_GRANTED, goBack = false)
+                            }
+                        }
                     }
                 }
             })
@@ -404,6 +416,8 @@ class AppInfo : ScopedFragment() {
                             } catch (e: NameNotFoundException) {
                                 showWarning(e.message ?: getString(R.string.error))
                             } catch (e: SecurityException) {
+                                showWarning(e.message ?: getString(R.string.error))
+                            } catch (e: ActivityNotFoundException) {
                                 showWarning(e.message ?: getString(R.string.error))
                             }
                         }
